@@ -123,6 +123,13 @@ router.post('/verify-otp', async (req, res, next) => {
       user.lastVisit = new Date();
       user.failedLoginAttempts = 0;
       user.lockUntil = null;
+
+      // ── Migrate old accounts: give them a fresh 7-day trial ──
+      if (!user.trialExpiresAt && !user.subscriptionExpiresAt) {
+        user.trialStartedAt = new Date();
+        user.trialExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      }
+
       await user.save();
     }
 
