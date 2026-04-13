@@ -5,8 +5,16 @@ const { analyzePatterns } = require('../services/riskEngine');
 
 const router = express.Router();
 
+// ── Admin-only guard ────────────────────────────────────────────
+const adminOnly = (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+  }
+  next();
+};
+
 // ── GET /api/admin/analytics ───────────────────────────────────
-router.get('/analytics', authenticate, async (req, res, next) => {
+router.get('/analytics', authenticate, adminOnly, async (req, res, next) => {
   try {
     const today = new Date(); today.setHours(0, 0, 0, 0);
 
@@ -23,7 +31,7 @@ router.get('/analytics', authenticate, async (req, res, next) => {
 });
 
 // ── GET /api/admin/flagged ─────────────────────────────────────
-router.get('/flagged', authenticate, async (req, res, next) => {
+router.get('/flagged', authenticate, adminOnly, async (req, res, next) => {
   try {
     const { flagged } = await analyzePatterns();
     res.json({ success: true, flagged });
@@ -31,7 +39,7 @@ router.get('/flagged', authenticate, async (req, res, next) => {
 });
 
 // ── GET /api/admin/heatmap ─────────────────────────────────────
-router.get('/heatmap', authenticate, async (req, res, next) => {
+router.get('/heatmap', authenticate, adminOnly, async (req, res, next) => {
   try {
     const { heatmap, networkMap, typeMap, total } = await analyzePatterns();
     res.json({ success: true, heatmap, networkMap, typeMap, total });
@@ -39,7 +47,7 @@ router.get('/heatmap', authenticate, async (req, res, next) => {
 });
 
 // ── GET /api/admin/reports ─────────────────────────────────────
-router.get('/reports', authenticate, async (req, res, next) => {
+router.get('/reports', authenticate, adminOnly, async (req, res, next) => {
   try {
     const page  = Math.max(parseInt(req.query.page)  || 1, 1);
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);

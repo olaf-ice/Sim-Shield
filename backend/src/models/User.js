@@ -27,6 +27,9 @@ const UserSchema = new mongoose.Schema({
   subscriptionStartedAt: { type: Date, default: null },
   subscriptionExpiresAt: { type: Date, default: null },
   paymentRef:            { type: String, default: null },
+
+  // ── Admin ─────────────────────────────────────────
+  isAdmin:               { type: Boolean, default: false },
 }, { timestamps: true });
 
 // ── Computed access helpers ────────────────────────────────────
@@ -68,6 +71,7 @@ UserSchema.methods.toProfile = function () {
     verified:              this.verified,
     lastVisit:             this.lastVisit,
     mfaEnabled:            this.mfaEnabled,
+    isAdmin:               this.isAdmin || false,
     joinedAt:              this.joinedAt,
     // Access
     hasAccess,
