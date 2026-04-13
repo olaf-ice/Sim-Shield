@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="SimShield Nigeria — Nigeria's first SIM Identity Risk Scoring platform. Detect fraud, report unauthorized SIM registrations, and protect your identity."/>
+  <meta name="keywords" content="SIM fraud Nigeria, NIN fraud, MTN Airtel Glo fraud detection, SIM identity verification Nigeria"/>
+  <meta property="og:title" content="SimShield Nigeria — Protect Your SIM Identity"/>
+  <meta property="og:description" content="Report unauthorized SIMs, check your identity risk score, and help fight telecom fraud in Nigeria."/>
+  <meta name="theme-color" content="#050b1a"/>
+  <title>SimShield Nigeria — SIM Identity Risk Score</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- ── Toast container ─────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ============================================================
+     VIEW: HOME (Landing Page)
+============================================================ -->
+<div id="view-home" class="view active">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="#home" class="navbar-brand">
+      <div class="brand-icon">🛡️</div>
+      <span class="brand-name">Sim<span>Shield</span></span>
+    </a>
+    <div class="navbar-actions">
+      <button class="btn btn-ghost btn-sm" data-nav="login" id="nav-login-btn">Sign In</button>
+      <button class="btn btn-primary btn-sm" data-nav="login" id="nav-signup-btn">Get Started</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">
+      <span>🇳🇬</span> Built for Nigeria · Powered by Community
+    </div>
+    <h1>
+      Is Your SIM Identity<br/>
+      <span class="accent">Safe</span> or at
+      <span class="accent-red">Risk?</span>
+    </h1>
+    <p class="hero-sub">
+      Millions of Nigerians have SIMs registered in their name without their knowledge.
+      SimShield lets you declare your SIMs, report fraud, and get a real-time
+      <strong>Identity Risk Score</strong> — powered by community intelligence.
+    </p>
+    <div class="hero-cta">
+      <button class="btn btn-primary btn-lg" data-nav="login" id="hero-cta-main">
+        🛡️ Check My Risk Score
+      </button>
+      <button class="btn btn-ghost btn-lg" data-nav="login" id="hero-cta-report">
+        🚨 Report a SIM
+      </button>
+    </div>
+
+    <!-- Floating risk score demo card -->
+    <div class="phone-mockup">
+      <div class="card card-glow" style="text-align:center;padding:32px 24px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),#00b8ff);"></div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;">
+          SAMPLE RISK PROFILE
+        </div>
+        <div style="position:relative;width:130px;height:130px;margin:0 auto 20px;">
+          <svg width="130" height="130" viewBox="0 0 130 130" style="transform:rotate(-90deg)">
+            <circle cx="65" cy="65" r="52" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="9"/>
+            <circle cx="65" cy="65" r="52" fill="none" stroke="#ff6b35" stroke-width="9"
+                    stroke-linecap="round" stroke-dasharray="326"
+                    stroke-dashoffset="98" style="transition:stroke-dashoffset 2s;"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <div style="font-size:34px;font-weight:900;color:#ff6b35;letter-spacing:-2px;">70</div>
+            <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">Risk Score</div>
+          </div>
+        </div>
+        <div style="font-size:16px;font-weight:800;color:#ff6b35;margin-bottom:8px;">🟠 High Risk</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Emeka O. · Lagos</div>
+        <div style="display:flex;flex-direction:column;gap:8px;text-align:left;">
+          <div style="display:flex;align-items:center;gap:8px;background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.2);border-radius:10px;padding:10px 12px;">
+            <span>⚠️</span>
+            <span style="font-size:12px;color:#ff6b35;">3 reports on your number</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;background:rgba(255,184,0,0.1);border:1px solid rgba(255,184,0,0.2);border-radius:10px;padding:10px 12px;">
+            <span>⚠️</span>
+            <span style="font-size:12px;color:#ffb800;">4 SIMs declared (above avg)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Banner -->
+  <div class="stats-banner">
+    <div class="stats-banner-grid">
+      <div><div class="banner-stat-value">12+</div><div class="banner-stat-label">Reports Submitted</div></div>
+      <div><div class="banner-stat-value">6</div><div class="banner-stat-label">States Covered</div></div>
+      <div><div class="banner-stat-value">4</div><div class="banner-stat-label">Fraud Patterns Detected</div></div>
+      <div><div class="banner-stat-value">4</div><div class="banner-stat-label">Networks Monitored</div></div>
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <section class="how-section">
+    <div style="text-align:center;margin-bottom:8px;">
+      <span style="font-size:12px;font-weight:700;color:var(--green);letter-spacing:2px;text-transform:uppercase;">HOW IT WORKS</span>
+    </div>
+    <h2 style="text-align:center;font-size:clamp(24px,4vw,36px);font-weight:900;letter-spacing:-0.8px;margin-bottom:8px;">
+      Fighting SIM Fraud Together
+    </h2>
+    <p style="text-align:center;color:var(--text-secondary);font-size:15px;max-width:500px;margin:0 auto;">
+      Our community-driven intelligence platform turns individual reports into actionable fraud intelligence.
+    </p>
+    <div class="how-grid">
+      <div class="how-card"><div class="how-num">STEP 01</div><div class="how-icon">📱</div><h3>Declare Your SIMs</h3><p>Register how many SIM cards are officially yours across MTN, Airtel, Glo, and 9mobile.</p></div>
+      <div class="how-card"><div class="how-num">STEP 02</div><div class="how-icon">🚨</div><h3>Report Suspicious Numbers</h3><p>Spotted a number registered in your name? Report it in seconds. Every report counts.</p></div>
+      <div class="how-card"><div class="how-num">STEP 03</div><div class="how-icon">🧠</div><h3>Intelligence is Built</h3><p>Our engine analyzes patterns, links reports, and identifies fraud hotspots across Nigeria.</p></div>
+      <div class="how-card"><div class="how-num">STEP 04</div><div class="how-icon">📊</div><h3>Get Your Risk Score</h3><p>Receive a real-time risk score from 0–100 showing how exposed your identity is to SIM fraud.</p></div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section style="padding:80px 24px;text-align:center;position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,255,136,0.06) 0%,transparent 70%);pointer-events:none;"></div>
+    <h2 style="font-size:clamp(28px,5vw,44px);font-weight:900;letter-spacing:-1px;margin-bottom:16px;">
+      Protect Your SIM Identity<br/>
+      <span style="color:var(--green);">Starting Today</span>
+    </h2>
+    <p style="color:var(--text-secondary);font-size:16px;max-width:440px;margin:0 auto 36px;line-height:1.7;">
+      It takes less than 2 minutes to register, declare your SIMs, and get your first risk score.
+    </p>
+    <button class="btn btn-primary btn-lg" data-nav="login" id="footer-cta-btn">
+      🛡️ Get Protected Now — It's Free
+    </button>
+    <p style="margin-top:20px;font-size:13px;color:var(--text-muted);">
+      No app download needed · Works on any phone · 🇳🇬 Made for Nigeria
+    </p>
+  </section>
+
+  <!-- Footer -->
+  <footer style="border-top:1px solid var(--border);padding:32px 24px;text-align:center;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;">
+      <div class="brand-icon" style="width:28px;height:28px;font-size:14px;">🛡️</div>
+      <span style="font-size:16px;font-weight:800;">Sim<span style="color:var(--green);">Shield</span> Nigeria</span>
+    </div>
+    <p style="font-size:13px;color:var(--text-muted);">
+      Fighting SIM identity fraud across Nigeria · <span style="color:var(--green);">Building the intelligence layer telcos need.</span>
+    </p>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:24px;">© 2026 SimShield Nigeria. Community-powered fraud intelligence.</p>
+  </footer>
+</div>
+
+<!-- VIEW: LOGIN -->
+<div id="view-login" class="view"></div>
+<!-- VIEW: ONBOARD -->
+<div id="view-onboard" class="view"></div>
+<!-- VIEW: DASHBOARD -->
+<div id="view-dashboard" class="view"></div>
+<!-- VIEW: DECLARE SIMs -->
+<div id="view-declare" class="view"></div>
+<!-- VIEW: REPORT FRAUD -->
+<div id="view-report" class="view"></div>
+<!-- VIEW: MY REPORTS -->
+<div id="view-my-reports" class="view"></div>
+<!-- VIEW: PAYMENT -->
+<div id="view-payment" class="view"></div>
+<!-- VIEW: ADMIN INTELLIGENCE DASHBOARD -->
+<div id="view-admin" class="view"></div>
+
+<!-- ── Scripts (order matters) ──────────────────────────────── -->
+<script src="js/data.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/payment.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
