@@ -6,7 +6,7 @@
 // Auto-detect environment: use live backend when not on localhost
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:5000/api'
-  : 'https://simshield-api.onrender.com/api';
+  : 'https://sim-shield.onrender.com/api';
 
 const Api = (() => {
 
