@@ -334,13 +334,6 @@ const Dashboard = (() => {
       window._netSims[network][index].number = value;
     }
   }
-lative;"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:14px;">🇳🇬</span>
-          <input class="form-input" style="padding-left:42px;" type="tel" maxlength="11" placeholder="08012345678" value="${sim.number||''}" oninput="Dashboard.setSimNumber(${i},this.value)" id="sim-number-${i}"/></div>
-        </div>
-      </div>`).join('');
-  }
-
-
 
   async function saveSims() {
     // Flatten per-network sims into a single array
