@@ -240,24 +240,25 @@ const Dashboard = (() => {
     if (h < 12) return 'morning'; if (h < 17) return 'afternoon'; return 'evening';
   }
 
-  // ── Declare SIMs view ──────────────────────────────────────
+  // ── Declare SIMs view (per-network: 4 SIMs × 4 networks = 16 max) ──
   async function renderDeclareView() {
     const user = Auth.currentUser();
     if (!user) { App.navigate('login'); return; }
 
-    let simCount = user.simCount || 0;
-    window._declareSims      = [...(user.sims || [])];
-    window._declareSimCount  = simCount;
+    // Build per-network state from existing sims
+    const networks = ['MTN','Airtel','Glo','9mobile'];
+    window._netSims = {};
+    networks.forEach(net => {
+      const existing = (user.sims || []).filter(s => s.network === net);
+      window._netSims[net] = existing.length ? existing.map(s => ({ network: net, number: s.number || '' })) : [];
+    });
 
     const el = document.getElementById('view-declare');
     el.innerHTML = `<nav class="navbar"><a href="#" class="navbar-brand" onclick="App.navigate('dashboard')"><div class="brand-icon">🛡️</div><span class="brand-name">Sim<span>Shield</span></span></a><div class="navbar-actions"><button class="btn btn-ghost btn-sm" onclick="App.navigate('dashboard')">← Back</button></div></nav>
-      <div class="page-container"><div class="page-header"><h2>📱 Declare My SIMs</h2><p>Tell us how many SIM cards are officially registered to you and which networks they belong to.</p></div>
-      <div class="alert alert-info fade-in" style="margin-bottom:24px;"><span class="alert-icon">ℹ️</span><span>By law, a Nigerian can register a maximum of <strong>1 SIM per network</strong> (up to 4 total). Declaring your SIMs helps us detect misuse.</span></div>
-      <div class="card fade-in" style="margin-bottom:20px;"><div class="section-title">HOW MANY SIMS DO YOU OWN?</div>
-        <div class="count-selector"><button class="count-btn" onclick="Dashboard.adjustCount(-1)">−</button><div class="count-display" id="sim-count-display">${simCount}</div><button class="count-btn" onclick="Dashboard.adjustCount(1)">+</button></div>
-        <div style="margin-top:14px;font-size:13px;color:var(--text-muted);" id="sim-count-hint">${simCount > 3 ? '⚠️ High SIM count may increase your risk score.' : simCount === 0 ? 'Tap + to add SIMs' : `${simCount} SIM${simCount>1?'s':''} selected`}</div>
-      </div>
-      <div id="sim-builder" class="fade-in"></div>
+      <div class="page-container"><div class="page-header"><h2>📱 Declare My SIMs</h2><p>Register all SIM cards officially linked to your identity across all networks.</p></div>
+      <div class="alert alert-info fade-in" style="margin-bottom:24px;"><span class="alert-icon">ℹ️</span><span>NCC Regulation: You may register <strong>up to 4 SIMs per network</strong> × 4 networks = <strong>16 SIMs maximum</strong> in Nigeria.</span></div>
+      <div id="network-sim-builder" class="fade-in"></div>
+      <div id="declare-total" style="text-align:center;font-size:13px;color:var(--text-muted);margin:16px 0;"></div>
       <div style="display:flex;gap:10px;margin-top:24px;margin-bottom:80px;">
         <button class="btn btn-ghost" onclick="App.navigate('dashboard')">Cancel</button>
         <button class="btn btn-primary" style="flex:1;" id="save-sims-btn" onclick="Dashboard.saveSims()">💾 Save My SIMs</button>
@@ -268,47 +269,91 @@ const Dashboard = (() => {
         <button class="bottom-nav-btn" onclick="App.navigate('my-reports')"><span class="nav-icon">📋</span><span>My Reports</span></button>
         <button class="bottom-nav-btn active"><span class="nav-icon">📱</span><span>My SIMs</span></button>
       </div>`;
-    renderSimBuilder();
+    renderNetworkSimBuilder();
   }
 
-  function adjustCount(delta) {
-    let count = Math.max(0, Math.min(4, window._declareSimCount + delta));
-    window._declareSimCount = count;
-    document.getElementById('sim-count-display').textContent = count;
-    const hint = document.getElementById('sim-count-hint');
-    if (hint) hint.textContent = count > 3 ? '⚠️ High SIM count may increase your risk score.' : count === 0 ? 'Tap + to add SIMs' : `${count} SIM${count>1?'s':''} selected`;
-    while (window._declareSims.length < count) window._declareSims.push({ network:'', number:'' });
-    window._declareSims = window._declareSims.slice(0, count);
-    renderSimBuilder();
-  }
-
-  function renderSimBuilder() {
-    const builder = document.getElementById('sim-builder');
+  function renderNetworkSimBuilder() {
+    const networks = [
+      { id:'MTN',     label:'MTN',     emoji:'🟡', color:'#ffcc00' },
+      { id:'Airtel',  label:'Airtel',  emoji:'🔴', color:'#ff3366' },
+      { id:'Glo',     label:'Glo',     emoji:'🟢', color:'#00c853' },
+      { id:'9mobile', label:'9mobile', emoji:'🟢', color:'#00b894' },
+    ];
+    const builder = document.getElementById('network-sim-builder');
     if (!builder) return;
-    const sims = window._declareSims;
-    if (!sims.length) { builder.innerHTML = ''; return; }
-    builder.innerHTML = sims.map((sim, i) => `
-      <div class="card fade-in" style="margin-bottom:12px;">
-        <div style="font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:14px;">SIM CARD ${i+1}</div>
-        <div class="form-group" style="margin-bottom:14px;"><label class="form-label">Network Provider</label>
-          <div class="network-grid">${NETWORKS.map(n=>`<button class="network-btn ${sim.network===n.id?'selected':''}" onclick="Dashboard.setSimNetwork(${i},'${n.id}')"><span class="network-emoji">${n.emoji}</span><span>${n.label}</span></button>`).join('')}</div>
-        </div>
-        <div class="form-group" style="margin-bottom:0;"><label class="form-label">Phone Number (Optional)</label>
-          <div style="position:relative;"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:14px;">🇳🇬</span>
+
+    let total = 0;
+    Object.values(window._netSims).forEach(arr => total += arr.length);
+    const totalEl = document.getElementById('declare-total');
+    if (totalEl) totalEl.textContent = `Total: ${total} / 16 SIMs declared`;
+
+    builder.innerHTML = networks.map(net => {
+      const sims = window._netSims[net.id] || [];
+      const count = sims.length;
+      return `
+        <div class="card fade-in" style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:24px;">${net.emoji}</span>
+              <div><div style="font-weight:800;font-size:15px;color:${net.color};">${net.label}</div>
+              <div style="font-size:12px;color:var(--text-muted);">${count} of 4 SIMs declared</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button onclick="Dashboard.adjustNetCount('${net.id}',-1)" style="width:32px;height:32px;border:1px solid var(--border);background:var(--bg-card);border-radius:8px;cursor:pointer;color:var(--text-primary);font-size:18px;display:flex;align-items:center;justify-content:center;">−</button>
+              <span style="font-weight:900;font-size:18px;min-width:20px;text-align:center;">${count}</span>
+              <button onclick="Dashboard.adjustNetCount('${net.id}',1)" style="width:32px;height:32px;border:1px solid var(--border);background:var(--bg-card);border-radius:8px;cursor:pointer;color:var(--green);font-size:18px;display:flex;align-items:center;justify-content:center;">+</button>
+            </div>
+          </div>
+          ${sims.map((sim, i) => `
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:14px;font-weight:700;color:var(--text-muted);min-width:20px;">${i + 1}.</span>
+              <div style="position:relative;flex:1;">
+                <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;">🇳🇬</span>
+                <input class="form-input" style="padding-left:40px;margin-bottom:0;" type="tel" maxlength="11" placeholder="08012345678" value="${sim.number || ''}" oninput="Dashboard.setNetSimNumber('${net.id}',${i},this.value)" />
+              </div>
+            </div>
+          `).join('')}
+          ${count === 4 ? `<div style="font-size:12px;color:var(--amber);margin-top:4px;">✅ Maximum 4 SIMs reached for ${net.label}</div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  function adjustNetCount(network, delta) {
+    const sims = window._netSims[network] || [];
+    if (delta > 0 && sims.length < 4) {
+      sims.push({ network, number: '' });
+    } else if (delta < 0 && sims.length > 0) {
+      sims.pop();
+    }
+    window._netSims[network] = sims;
+    renderNetworkSimBuilder();
+  }
+
+  function setNetSimNumber(network, index, value) {
+    if (window._netSims[network] && window._netSims[network][index] !== undefined) {
+      window._netSims[network][index].number = value;
+    }
+  }
+lative;"><span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:14px;">🇳🇬</span>
           <input class="form-input" style="padding-left:42px;" type="tel" maxlength="11" placeholder="08012345678" value="${sim.number||''}" oninput="Dashboard.setSimNumber(${i},this.value)" id="sim-number-${i}"/></div>
         </div>
       </div>`).join('');
   }
 
-  function setSimNetwork(i, network) { window._declareSims[i].network = network; renderSimBuilder(); }
-  function setSimNumber(i, value)    { window._declareSims[i].number  = value; }
+
 
   async function saveSims() {
-    const sims  = window._declareSims;
-    const count = window._declareSimCount;
-    for (let i = 0; i < sims.length; i++) {
-      if (!sims[i].network) { Toast.show(`Please select a network for SIM ${i+1}`, 'error'); return; }
-    }
+    // Flatten per-network sims into a single array
+    const networks = ['MTN','Airtel','Glo','9mobile'];
+    const sims = [];
+    networks.forEach(net => {
+      (window._netSims[net] || []).forEach(sim => {
+        if (!sim.network) sim.network = net;
+        sims.push(sim);
+      });
+    });
+
+    const count = sims.length;
     const btn = document.getElementById('save-sims-btn');
     btn.disabled = true; btn.textContent = 'Saving...';
     try {
@@ -410,7 +455,7 @@ const Dashboard = (() => {
   }
 
   return { 
-    renderUserDashboard, renderDeclareView, adjustCount, setSimNetwork, setSimNumber, saveSims, renderSimCard,
+    renderUserDashboard, renderDeclareView, adjustNetCount, setNetSimNumber, saveSims, renderSimCard,
     toggleNotifications, renderSecurityView, setupMFA, enableMFA
   };
 })();

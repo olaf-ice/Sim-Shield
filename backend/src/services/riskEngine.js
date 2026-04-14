@@ -47,9 +47,22 @@ async function calculateRiskScore(user) {
     }
   });
 
-  if ((user.simCount || 0) > 3) {
-    score += WEIGHTS.highSimCount;
-    reasons.push(`You declared ${user.simCount} SIMs — above average`);
+  // ── NCC Regulation: max 4 SIMs per network, 16 total ──────────
+  const networks = ['MTN', 'Airtel', 'Glo', '9mobile'];
+  const userSims = user.sims || [];
+
+  networks.forEach(net => {
+    const netSims = userSims.filter(s => s.network === net);
+    if (netSims.length > 4) {
+      score += WEIGHTS.highSimCount;
+      reasons.push(`You have ${netSims.length} ${net} SIMs — exceeds the legal limit of 4 per network`);
+    }
+  });
+
+  const totalSims = user.simCount || 0;
+  if (totalSims > 12) {
+    score += 10;
+    reasons.push(`${totalSims} total SIMs declared — unusually high`);
   }
 
   if (!user.verified) {
